@@ -1,0 +1,13 @@
+name: split_by_cluster
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - _libgcc_mutex=0.1
+  - _openmp_mutex=4.5
+  - libgcc-ng=11.2.0
+  - libgomp=11.2.0
+  - libzlib=1.2.11
+  - seqtk=1.3
+  - zlib=1.2.11

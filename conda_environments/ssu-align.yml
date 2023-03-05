@@ -1,0 +1,19 @@
+name: ssu-align
+channels:
+  - bioconda/label/main
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - _libgcc_mutex=0.1
+  - _openmp_mutex=4.5
+  - bzip2=1.0.8
+  - fasttree=2.1.11
+  - libgcc-ng=11.2.0
+  - libgomp=11.2.0
+  - libnsl=2.0.0
+  - libstdcxx-ng=11.2.0
+  - perl=5.32.1
+  - ssu-align=0.1.1
+  - vsearch=2.18.0
+  - zlib=1.2.12

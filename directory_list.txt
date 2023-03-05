@@ -1,0 +1,7 @@
+TEMPLATE_DIR="/media/HD3/home/user/nanopore_wd/scripts" #script directory
+CONDA_DIR="/media/HD3/home/user/miniconda3/envs/" #conda directory
+RESOURCE_DIR="/media/HD3/home/user/nanopore_wd/resources"
+REF_SEQ="rdp_v16_sp.udb" #reference sequence database
+lass_lasttrain="promethion.mat" #last-train file required for lassemble
+
+source /media/HD3/home/user/miniconda3/etc/profile.d/conda.sh #set to conda directory
