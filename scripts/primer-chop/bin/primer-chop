@@ -1,0 +1,32 @@
+#! /bin/sh
+
+PATH=$PATH:$(dirname "$0")
+
+while getopts P:qnm: opt
+do
+    case $opt in
+	P) P=-P$OPTARG ;;
+	q) q=-q ;;
+	n) n=-n ;;
+	m) m=-m$OPTARG ;;
+	?) exit ;;
+    esac
+done
+shift $(($OPTIND - 1))
+
+test $# -eq 3 || {
+    echo "Usage:
+$0 [-P threads] [-q] [-n] [-m PROB] primers.fa reads.fq output-name"
+    exit
+}
+
+mkdir "$3" || exit
+
+lastdb -R10 -c -uNEAR -B1 "$3"/lastdb "$1"
+
+last-train -m2 -Q1 -q10 -a3 -X1 $P "$3"/lastdb "$2" > "$3"/train.txt
+
+lastal -m2 -p "$3"/train.txt $P --split "$3"/lastdb "$2" |
+primer-chop-analyze $q $n $m "$2" - "$3"
+
+rm "$3"/lastdb.*

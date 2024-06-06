@@ -1,0 +1,171 @@
+#! /usr/bin/env python
+# Copyright 2019 Martin C. Frith
+# SPDX-License-Identifier: MIT
+
+from __future__ import print_function
+
+import gzip
+import itertools
+import optparse
+import signal
+import sys
+from operator import itemgetter
+
+def openFile(fileName):
+    if fileName == "-":
+        return sys.stdin
+    if fileName.endswith(".gz"):
+        return gzip.open(fileName, "rt")  # xxx dubious for Python2
+    return open(fileName)
+
+xCompl = "ACGTRYKMBDHV"
+yCompl = "TGCAYRMKVHDB"
+xCompl += xCompl.lower()
+yCompl += yCompl.lower()
+def complement(base):
+    i = xCompl.find(base)
+    return yCompl[i] if i >= 0 else base
+
+def sequencesFromLines(lines):
+    title = None
+    fastq = None
+    for line in lines:
+        stripped = line.rstrip()
+        if fastq is not None:
+            fastq.append(stripped)
+            if len(fastq) == 4:
+                yield fastq
+                fastq = []
+        elif line[0] == ">":
+            if title:
+                yield title, "".join(seq), None, ""
+            title = stripped
+            seq = []
+        elif title:
+            seq.append(stripped)
+        else:
+            fastq = [stripped]
+    if title:
+        yield title, "".join(seq), None, ""
+
+def alignmentsFromLines(lines):
+    for line in lines:
+        fields = line.split()
+        if line[0] == "a":
+            for i in fields:
+                if i.startswith("mismap="):
+                    aln = [i[7:]]
+        elif line[0] == "s":
+            seqName = fields[1]
+            beg = int(fields[2])
+            span = int(fields[3])
+            isRev = (fields[4] == "-")
+            seqLen = int(fields[5])
+            aln = [seqName, seqLen, beg, beg + span, isRev] + aln
+            if len(aln) > 9:
+                yield aln
+
+def alignmentDataFromFile(lines):
+    maxHeadPrimerStartCoord = 200 #editWS was 100
+    maxTailPrimerStartCoord = 200 #editWS was 100
+    #
+    alignments = alignmentsFromLines(lines)
+    for seqData, group in itertools.groupby(alignments, itemgetter(0, 1)):
+        seqName, seqLen = seqData
+        chopBeg = 0
+        chopEnd = seqLen
+        isRevStrand = None
+        tailName = None
+        mismap = None
+        for i in group:
+            isRev = i[4]
+            qBeg = i[2]
+            rBeg = i[7]
+            primerName = i[5].lower()
+            if "head" in primerName or "ssp" in primerName:
+                if chopBeg > 0 or qBeg - rBeg > maxHeadPrimerStartCoord:
+                    chopBeg = seqLen
+                else:
+                    chopBeg = i[3]
+            elif "tail" in primerName:
+                qBeg = i[1] - i[3]
+                rBeg = i[6] - i[8]
+                if chopEnd < seqLen or qBeg - rBeg > maxTailPrimerStartCoord:
+                    chopEnd = 0
+                else:
+                    chopEnd = i[2]
+            elif "vnp" in primerName:
+                isRev = not isRev
+                if chopEnd < seqLen or qBeg - rBeg > maxTailPrimerStartCoord:
+                    chopEnd = 0
+                else:
+                    chopEnd = seqLen - i[3]
+                tailName = i[5]
+                mismap = i[10]
+            else:
+                raise RuntimeError("bad primer name")
+            if isRevStrand is not None and isRev is not isRevStrand:
+                chopEnd = 0
+            isRevStrand = isRev
+        data = isRev, chopBeg, chopEnd, tailName, mismap
+        yield seqName, data
+
+def main(opts, args):
+    dataPerSeq = dict(alignmentDataFromFile(openFile(args[1])))
+    outFiles = {}
+    logFile = open(args[2] + "/log.txt", "w")
+
+    for title, seq, junk, qual in sequencesFromLines(openFile(args[0])):
+        seqName = title[1:].split()[0]
+        data = dataPerSeq.get(seqName)
+        if data is None:
+            print(seqName, "no primers found", sep="\t", file=logFile)
+            continue
+        isRev, chopBeg, chopEnd, tailName, mismap = data
+        if chopBeg >= chopEnd:
+            print(seqName, "weird primers (chimeric?)", sep="\t", file=logFile)
+            continue
+        if not opts.q:
+            qual = ""
+        seqLen = len(seq)
+        if tailName and float(mismap) > opts.m:
+            tailName = "maybe-" + tailName
+        if chopBeg == 0:
+            fileName = tailName + "-no_head" if tailName else "no_head"
+        elif chopEnd == seqLen:
+            fileName = "no_tail"
+        else:
+            fileName = tailName if tailName else "good"
+        fileName += ("-fwd", "-rev")[isRev]
+        fileName += ".fq" if qual else ".fa"
+        if fileName not in outFiles:
+            outFiles[fileName] = open(args[2] + "/" + fileName, "w")
+        f = outFiles[fileName]
+        if isRev:
+            seq = "".join(map(complement, reversed(seq)))
+            qual = qual[::-1]
+        c = "@" if qual else ">"
+        if tailName:
+            print(c + seqName, "VNPerr=" + mismap, file=f)
+        else:
+            print(c + seqName, file=f)
+        choppedSeq = seq if opts.n else seq[chopBeg:chopEnd]
+        print(choppedSeq, file=f)
+        if qual:
+            print("+", file=f)
+            choppedQual = qual if opts.n else qual[chopBeg:chopEnd]
+            print(choppedQual, file=f)
+
+if __name__ == "__main__":
+    signal.signal(signal.SIGPIPE, signal.SIG_DFL)  # avoid silly error message
+    usage = "%prog [options] reads.fq alignments.maf output-directory"
+    op = optparse.OptionParser(usage=usage)
+    op.add_option("-q", action="store_true", help="keep fastq quality data")
+    op.add_option("-n", action="store_true", help="don't chop anything off")
+    op.add_option("-m", type="float", default=0.01, metavar="PROB",
+                  help="maximum VNP mismap probability")
+    opts, args = op.parse_args()
+    if len(args) == 3:
+        main(opts, args)
+    else:
+        op.print_help()
