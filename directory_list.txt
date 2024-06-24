@@ -1,7 +1,11 @@
-TEMPLATE_DIR="/media/HD3/home/user/nanopore_wd/scripts" #script directory
-CONDA_DIR="/media/HD3/home/user/miniconda3/envs/" #conda directory
-RESOURCE_DIR="/media/HD3/home/user/nanopore_wd/resources"
-REF_SEQ="rdp_v16_sp.udb" #reference sequence database
-lass_lasttrain="promethion.mat" #last-train file required for lassemble
+TEMPLATE_DIR="/home/user/nanopore_wd/scripts" #adjust to script directory
+PRIMER_SET="/home/user/nanopore_wd/primer_set.fa" #adjust to the directory where the primer file is located
+#primer file should be a fasta file in which:
+#The head primer should have "head" in its name (case-insensitive).Likewise for the tail primer.
+#Both sequences should be those that appear in the cDNA's sense strand.
+# sequences are not limited to the primers itself but can also include anchor sequences; longer sequences generaly give better results
 
-source /media/HD3/home/user/miniconda3/etc/profile.d/conda.sh #set to conda directory
+MIN=1400 #minimal sequence length to retain (min filter)
+MAX=1700 #maximal sequence length to retain (max filter)
+MERGE_CONSENSUS=1 #similarity on which to cluster consensus sequences across samples [0,1]
+THREADS=8 # set number of threads to use
