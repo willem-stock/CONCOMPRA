@@ -24,7 +24,12 @@ git clone https://github.com/willem-stock/CONCOMPRA.git
 conda env create -f CONCOMPRA.yml
 ```
 this is likely to take a few minutes resolve the environment (if this takes too long, consider updating conda or switch to mamba) 
-
+* make sure that you can execute the scripts
+```
+chmod +x $CONCOMPRA_dir/scripts/*py
+chmod +x $CONCOMPRA_dir/scripts/primer-chop/bin/primer-chop
+chmod +x $CONCOMPRA_dir/scripts/primer-chop/bin/primer-chop-analyze
+```
 * prepare the folder with the fastq files you want to process. move or copy the directory_list.txt' to this folder
 * provide the primer sequences in a fasta file (see info on how to format in the 'directory_list.txt' file)
 
