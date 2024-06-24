@@ -1,0 +1,24 @@
+name: CONCOMPRA
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python==3.11
+  - numba
+  - last
+  - vsearch
+  - seqtk
+  - lamassemble
+  - minimap2
+  - pandas
+  - scikit-learn
+  - tqdm
+  - multiprocess
+  - biopython
+  - umap-learn
+  - matplotlib
+  - hdbscan
+  - imagemagick
+  - filtlong
+  - seqkit
