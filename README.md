@@ -63,7 +63,7 @@ this will generate a nohup.out where you can monitor the process
 * using the sequences of not only the primers, but also the anchor sequences in the primer sequence file (primer_set.fa ) will likely improve the results
 * only identical consensus sequences will be merged under the default settings. You decide to merge highly similar sequences by setting the MERGE_CONSENSUS parameter in directory_list.txt
 * you can change the number of threads used though the THREADS parameter in directory_list.txt
-* although the default clustering parameters have been chosen based on test with various amplicons and sequencing chemistries, it could be that these are not ideal for your data. you can experiment with different parameters by changing these in the kmer_umap_OPTICS python script. have a look at [UMAP](https://umap-learn.readthedocs.io/en/latest/) and [OPTICS](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.OPTICS.html) to see how changing these parameters can influence the clustering.   
+* although the default clustering parameters have been chosen based on tests with various amplicons and sequencing chemistries, it could be that these are not ideal for your data. You can experiment with different parameters by changing these in the kmer_umap_OPTICS python script. Have a look at [UMAP](https://umap-learn.readthedocs.io/en/latest/) and [OPTICS](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.OPTICS.html) to see how changing these parameters can influence the clustering.   
 
 ## Output
 A result directory will be created in which there will be the most relevant files created by CONCOMPRA:
