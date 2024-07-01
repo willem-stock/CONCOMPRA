@@ -21,7 +21,7 @@ git clone https://github.com/willem-stock/CONCOMPRA.git
 * create the conda environments from the yml file
 [execute in  the conda_environments directory]
 ```
-conda env create -f CONCOMPRA.yml
+conda env create -f CONCOMPRA/CONCOMPRA.yml
 ```
 this is likely to take a few minutes resolve the environment (if this takes too long, consider updating conda or switch to mamba) 
 * make sure that you can execute the scripts
