@@ -78,5 +78,15 @@ A result directory will be created in which there will be the most relevant file
 The reads that failed to map to the consensus sequences are in the unmapped folder
 
 
-* the output files can be further processed with phyloseq in R (an r script is available in this repository to get you started: CONCOMPRA_local_postprocessing.R)
-
+The output files can be further processed with phyloseq in R (an r script is available in this repository to get you started: CONCOMPRA_local_postprocessing.R)
+Alternatively, you can use vsearch (which is present in the CONCOMPRA environment) to assign a taxonomy to your consensus sequences. 
+For this, you'll have to:
+* download one of the [available reference databases](https://www.drive5.com/usearch/manual/sintax_downloads.html)
+* create aa UDB database file from the database file
+```
+vsearch -makeudb_usearch $DATABASE.gz -output $DATABASE.udb
+```
+* generate taxonomic annotations
+```
+vsearch --sintax $FASTA_FILE --db $DATABASE.udb --tabbedout reads.sintax
+```
