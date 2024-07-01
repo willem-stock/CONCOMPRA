@@ -57,7 +57,8 @@ nohup bash ../scripts/main.sh &
 
 this will generate a nohup.out where you can monitor the process
 
-[remark: if the analyses is halted whilst not all files in a folder have been processed, just execute the main.sh again as it will skip the files which have been processed]
+> [!NOTE]
+> if the analysis is halted whilst not all files in a folder have been processed, just execute the main.sh again as it will skip the files which have already been processed
 
 ## Optimising
 * using the sequences of not only the primers, but also the anchor sequences in the primer sequence file (primer_set.fa ) will likely improve the results
@@ -79,14 +80,15 @@ The reads that failed to map to the consensus sequences are in the unmapped fold
 
 
 The output files can be further processed with phyloseq in R (an r script is available in this repository to get you started: CONCOMPRA_local_postprocessing.R)
-Alternatively, you can use vsearch (which is present in the CONCOMPRA environment) to assign a taxonomy to your consensus sequences. 
-For this, you'll have to:
-* download one of the [available reference databases](https://www.drive5.com/usearch/manual/sintax_downloads.html)
-* create aa UDB database file from the database file
-```
-vsearch -makeudb_usearch $DATABASE.gz -output $DATABASE.udb
-```
-* generate taxonomic annotations
-```
-vsearch --sintax $FASTA_FILE --db $DATABASE.udb --tabbedout reads.sintax
-```
+> [!TIP]
+> You can use vsearch (which is present in the CONCOMPRA environment) to assign a taxonomy to your consensus sequences. 
+> For this, you'll have to:
+> * download one of the [available reference databases](https://www.drive5.com/usearch/manual/sintax_downloads.html)
+> * create a UDB database file 
+> ```
+> vsearch -makeudb_usearch $DATABASE.gz -output $DATABASE.udb
+> ```
+> * generate taxonomic annotations
+> ```
+> vsearch --sintax $FASTA_FILE --db $DATABASE.udb --tabbedout reads.sintax
+> ```
