@@ -35,6 +35,8 @@ chmod +x $CONCOMPRA_dir/scripts/primer-chop/bin/primer-chop-analyze
 * prepare the folder with the fastq files you want to process
 * move or copy the directory_list.txt' to this folder. Adjust the directories in this file and set the sequence length window
 * provide the primer sequences in a fasta file (see info on how to format in the 'directory_list.txt' file; and example file is proved in the CONCOMPRA directory)
+> [!TIP]
+> a small 16S rRNA gene dataset is available for testing on [figshare](https://doi.org/10.6084/m9.figshare.26139061.v1)
 
 
 ## Running CONCOMPRA
