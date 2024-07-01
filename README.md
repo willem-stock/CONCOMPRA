@@ -5,6 +5,8 @@ consensus approach for community profiling with nanopore amplicon sequencing dat
 * [General info](#general-info)
 * [Installation](#installation)
 * [Running CONCOMPRA](#running-concompra)
+* [Optimising](#optimising)
+* [Output](#output)
 
 
 
@@ -30,8 +32,9 @@ chmod +x $CONCOMPRA_dir/scripts/*py
 chmod +x $CONCOMPRA_dir/scripts/primer-chop/bin/primer-chop
 chmod +x $CONCOMPRA_dir/scripts/primer-chop/bin/primer-chop-analyze
 ```
-* prepare the folder with the fastq files you want to process. move or copy the directory_list.txt' to this folder
-* provide the primer sequences in a fasta file (see info on how to format in the 'directory_list.txt' file)
+* prepare the folder with the fastq files you want to process
+* move or copy the directory_list.txt' to this folder. Adjust the directories in this file and set the sequence length window
+* provide the primer sequences in a fasta file (see info on how to format in the 'directory_list.txt' file; and example file is proved in the CONCOMPRA directory)
 
 
 ## Running CONCOMPRA
@@ -46,7 +49,7 @@ conda activate CONCOMPRA
 ```
 bash ../scripts/main.sh
 ```
-As it may take 15-30 min/sample, it is advised use a tmux session, screen or nohup (so you disconnect from the terminal)
+As it may take 5-30 min/sample, it is advised use a tmux session, screen or nohup (so you disconnect from the terminal)
 
 ```
 nohup bash ../scripts/main.sh &
@@ -56,4 +59,24 @@ this will generate a nohup.out where you can monitor the process
 
 [remark: if the analyses is halted whilst not all files in a folder have been processed, just execute the main.sh again as it will skip the files which have been processed]
 
-* the output files can be further processed with phyloseq in R (an r script is available in this reposatory to get you started: CONCOMPRA_local_postprocessing.R)
+## Optimising
+* using the sequences of not only the primers, but also the anchor sequences in the primer sequence file (primer_set.fa ) will likely improve the results
+* only identical consensus sequences will be merged under the default settings. You decide to merge highly similar sequences by setting the MERGE_CONSENSUS parameter in directory_list.txt
+* you can change the number of threads used though the THREADS parameter in directory_list.txt
+* although the default clustering parameters have been chosen based on test with various amplicons and sequencing chemistries, it could be that these are not ideal for your data. you can experiment with different parameters by changing these in the kmer_umap_OPTICS python script. have a look at [UMAP](https://umap-learn.readthedocs.io/en/latest/) and [OPTICS](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.OPTICS.html) to see how changing these parameters can influence the clustering.   
+
+## Output
+A result directory will be created in which there will be the most relevant files created by CONCOMPRA:
+* a fasta file labelled all_consensus: this file contains all consensus sequences generated across the different samples (the sample names are incorporated in the sequence identifier)
+* a fasta file labelled clustered_consensus: this file contains the consensus sequences, generated across the different samples, clustered according to the similarity you have set in the directory_list file (default is 1)
+* a fasta file labelled noglobal_nolocalchim.consensus.sequences: this file contains the non-chimeric sequences consensus sequences, clustered according to the similarity you have set in the directory_list file  [this will likely be the file you'll want to use]
+* the fasta files nolocalchim.consensus & noglobal_nolocalchim.consensus which contain the clustered consensus files not considered to be chimeric based on within sample chimeric check/global chimeric check respectively
+* a fasta file labeled chimeric_consensus.sequences: contains the clustered consensus sequences flagged as chimeric based on the global chimeric check 
+* the plots of the UMAP results (colours are used to indicate the different clusters; note that each dot is a sequence but only sequences used for generating consensus sequences are shown)
+* the OTU table in the format of a comma-separated text file (easy to open in any text editor, Excel, R,..). Note that the OTUs in this file are the sequences in clustered_consensus fasta file   
+
+The reads that failed to map to the consensus sequences are in the unmapped folder
+
+
+* the output files can be further processed with phyloseq in R (an r script is available in this repository to get you started: CONCOMPRA_local_postprocessing.R)
+
