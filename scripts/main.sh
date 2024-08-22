@@ -1,5 +1,7 @@
 source directory_list.txt #set to file containing directories
 
+echo 'This is CONCOMPRA 0.0.1'
+
 mkdir -p temporary/filteredPAFs
 for file in *.fastq; do awk -v min=$MIN -v max=$MAX 'BEGIN {FS = "\t" ; OFS = "\n"} {header = $0 ; getline seq ; getline qheader ; getline qseq ; if (length(seq) >= min && length(seq) <= max) {print header, seq, qheader, qseq}}' < $file |tr -d " " > temporary/"$file" ; done
 for file in *.fastq; do
