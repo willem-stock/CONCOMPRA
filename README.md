@@ -22,8 +22,10 @@ git clone https://github.com/willem-stock/CONCOMPRA.git
 ```
 * create the conda environments from the yml file
 [execute in  the conda_environments directory]
+> [!NOTE]
+> a directory CONCOMPRA should have been created in your path. For the steps that follow, either replace '$CONCOMPRA_dir' by the path to this directory or assign the path to the variable 'CONCOMPRA_dir'  like this ```CONCOMPRA_dir="/home/user/CONCOMPRA/"``` and just copy the commands
 ```
-conda env create -f CONCOMPRA/CONCOMPRA.yml
+conda env create -f $CONCOMPRA_dir/CONCOMPRA.yml
 ```
 this is likely to take a few minutes resolve the environment (if this takes too long, consider updating conda or switch to mamba) 
 * make sure that you can execute the scripts
@@ -41,7 +43,7 @@ chmod +x $CONCOMPRA_dir/scripts/primer-chop/bin/primer-chop-analyze
 
 ## Running CONCOMPRA
 
-The current version only works with uncompressed fastq files
+CONCOMPRA works with uncompressed (.fastq) and compressed (.fastq.gz) files
 * activate the conda environement
 ```
 conda activate CONCOMPRA
@@ -49,12 +51,12 @@ conda activate CONCOMPRA
 * with the folder containing the fastqs as your present working directory: excute the main.sh in the script directory 
 
 ```
-bash ../scripts/main.sh
+bash $CONCOMPRA_dir/scripts/main.sh
 ```
 As it may take 5-30 min/sample, it is advised use a tmux session, screen or nohup (so you disconnect from the terminal)
 
 ```
-nohup bash ../scripts/main.sh &
+nohup bash $CONCOMPRA_dir/scripts/main.sh &
 ```
 
 this will generate a nohup.out where you can monitor the process
@@ -66,6 +68,7 @@ this will generate a nohup.out where you can monitor the process
 * using the sequences of not only the primers, but also the anchor sequences in the primer sequence file (primer_set.fa ) will likely improve the results
 * only identical consensus sequences will be merged under the default settings. You decide to merge highly similar sequences by setting the MERGE_CONSENSUS parameter in directory_list.txt
 * you can change the number of threads used though the THREADS parameter in directory_list.txt
+* you can change the number of reads used per cluster to draw the consensus sequences though the READS_CONSENSUS parameter in directory_list.txt. If you expect very few errors, reducing this parameter will increase the speed and whilst likely retaining the precision  
 * although the default clustering parameters have been chosen based on tests with various amplicons and sequencing chemistries, it could be that these are not ideal for your data. You can experiment with different parameters by changing these in the kmer_umap_OPTICS python script. Have a look at [UMAP](https://umap-learn.readthedocs.io/en/latest/) and [OPTICS](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.OPTICS.html) to see how changing these parameters can influence the clustering.   
 
 ## Output
