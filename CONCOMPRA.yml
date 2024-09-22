@@ -5,20 +5,20 @@ channels:
   - defaults
 dependencies:
   - python==3.11
-  - numba
+  - numba==0.60.0
   - last
-  - vsearch
-  - seqtk
-  - lamassemble
-  - minimap2
-  - pandas
-  - scikit-learn
-  - tqdm
+  - vsearch==2.28.1
+  - seqtk==1.2
+  - lamassemble==1.7.2
+  - minimap2==2.1.1
+  - pandas==2.2.2
+  - scikit-learn==1.5.1
+  - tqdm==4.66.5
   - multiprocess
-  - biopython
-  - umap-learn
-  - matplotlib
-  - hdbscan
-  - imagemagick
-  - filtlong
-  - seqkit
+  - biopython==1.84
+  - umap-learn==0.5.6
+  - matplotlib=3.9.2
+  - hdbscan==0.8.38
+  - imagemagick<7
+  - filtlong==0.2.1
+  - seqkit==2.8.2
