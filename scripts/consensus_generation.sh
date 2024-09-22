@@ -52,7 +52,7 @@ process_cluster() {
     cluster_id=$1
     seqtk subseq primerchop_out/good-fwd.filt.fa "${cluster_id}_ids.txt" > "${cluster_id}.fas"
     READ_COUNT=$(( $(awk '{print $1/2}' <(wc -l "${cluster_id}.fas")) ))
-    head -80 "${cluster_id}.fas" | lamassemble primerchop_out/train.txt - > "${CLEAN_NAME}${cluster_id}@size=${READ_COUNT}@.consensus.fasta"
+    seqtk sample "${cluster_id}.fas" "${READS_CONSENSUS}"| lamassemble primerchop_out/train.txt - > "${CLEAN_NAME}${cluster_id}@size=${READ_COUNT}@.consensus.fasta"
 }
 
 for ((i = 0 ; i <= $CLUSTERS_CNT ; i++)); do
@@ -62,7 +62,7 @@ done
 wait
 
 
-echo 'consensus sequences generated for $CLEAN_NAME'
+echo "consensus sequences generated for $CLEAN_NAME"
 
 awk '/^>/ {gsub(/.consensus.fasta?$/,"",FILENAME);printf(">%s\n",FILENAME);next;} {print}' *.consensus.fasta > $CLEAN_NAME.all_consensus.fasta
 sed -i 's/@/;/g' $CLEAN_NAME.all_consensus.fasta
