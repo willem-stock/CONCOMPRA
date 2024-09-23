@@ -8,4 +8,5 @@ PRIMER_SET="/home/user/CONCOMPRA/primer_set.fa" #adjust to the directory where t
 MIN=1400 #minimal sequence length to retain (min filter)
 MAX=1700 #maximal sequence length to retain (max filter)
 MERGE_CONSENSUS=1 #similarity on which to cluster consensus sequences across samples [0,1]
+READS_CONSENSUS=40 #the number of reads to subsample from a cluster to draft the consensus sequence
 THREADS=8 # set number of threads to use

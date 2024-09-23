@@ -1,14 +1,38 @@
 source directory_list.txt #set to file containing directories
 
-echo 'This is CONCOMPRA 0.0.1'
+echo 'This is CONCOMPRA 0.0.2'
+echo 'for additional information and help, visit: https://github.com/willem-stock/CONCOMPRA'
 
 mkdir -p temporary/filteredPAFs
-for file in *.fastq; do awk -v min=$MIN -v max=$MAX 'BEGIN {FS = "\t" ; OFS = "\n"} {header = $0 ; getline seq ; getline qheader ; getline qseq ; if (length(seq) >= min && length(seq) <= max) {print header, seq, qheader, qseq}}' < $file |tr -d " " > temporary/"$file" ; done
-for file in *.fastq; do
-    ((i=i%THREADS)); ((i++==0)) && wait
-    bash $TEMPLATE_DIR/consensus_generation.sh "$file" directory_list.txt &
+for file in  *.{fastq,fastq.gz}; do
+    if [[ "$file" == *.fastq.gz ]]; then
+        zcat "$file" | awk -v min=$MIN -v max=$MAX 'BEGIN {FS = "\t"; OFS = "\n"} 
+        {
+            header = $0; getline seq; getline qheader; getline qseq; 
+            if (length(seq) >= min && length(seq) <= max) {
+                print header, seq, qheader, qseq
+            }
+        }' | tr -d " " > temporary/"${file%.gz}"
+    else
+        # Use regular cat for .fastq files
+        cat "$file" | awk -v min=$MIN -v max=$MAX 'BEGIN {FS = "\t"; OFS = "\n"} 
+        {
+            header = $0; getline seq; getline qheader; getline qseq; 
+            if (length(seq) >= min && length(seq) <= max) {
+                print header, seq, qheader, qseq
+            }
+        }' | tr -d " " > temporary/"$file"
+    fi
 done
-#find . -name "*.fastq" | parallel -j $THREADS bash $TEMPLATE_DIR/consensus_generation.sh {} $directory_list
+
+#remove empty files after filtering
+find ./temporary -type f -empty -delete
+
+# Run consensus generation in parallel
+for file in ./temporary/*.fastq; do
+    ((i=i%THREADS)); ((i++==0)) && wait
+    bash "$TEMPLATE_DIR/consensus_generation.sh" "$(basename "$file")" directory_list.txt &
+done
 wait
 
 mkdir -p results
@@ -31,22 +55,22 @@ minimap2 -d temporary/across_sample_consensus_sequences.mmi results/clustered_co
 mkdir -p unmapped # folder for any unmapped reads
 
 #map reads to the consensus sequences
-for file in *.fastq;
+for file in ./temporary/*.fastq;
 do
 	cd temporary
-	CLEAN_NAME="${file%.*}" 
-	NO_DIR_NAME="${file##*/}"
-	minimap2 -x map-ont -t $THREADS --secondary=no -K 20M across_sample_consensus_sequences.mmi $CLEAN_NAME/$file > $CLEAN_NAME.paf
-	RES=$(echo "scale=4; $MIN*0.9" | bc)
+        NO_DIR_NAME="$(basename "$file")"
+	CLEAN_NAME="${NO_DIR_NAME%.*}"
+	minimap2 -x map-ont -t $THREADS -K 20M across_sample_consensus_sequences.mmi $CLEAN_NAME/$NO_DIR_NAME > $CLEAN_NAME.paf
+	RES=$(awk "BEGIN {printf \"%.4f\",$MIN * 0.9}")
 	$TEMPLATE_DIR/filterPAF_strict.py -i $CLEAN_NAME.paf -b $RES -m 10 > $CLEAN_NAME.CONCOMPRA.paf
 
 	#split of the unmapped reads
 	cut  -f1 $CLEAN_NAME.CONCOMPRA.paf |uniq > $CLEAN_NAME.CONCOMPRA.ls
-	awk '{if(NR%4==1) print $1, $5}' $CLEAN_NAME/$file | sed -e "s/^@//" | awk '{$1=$1};1' > $CLEAN_NAME.all.ls
+	awk '{if(NR%4==1) print $1, $5}' $CLEAN_NAME/$NO_DIR_NAME | sed -e "s/^@//" | awk '{$1=$1};1' > $CLEAN_NAME.all.ls
 	sort $CLEAN_NAME.CONCOMPRA.ls | uniq > $CLEAN_NAME.CONCOMPRA.ls.sorted
 	sort $CLEAN_NAME.all.ls | uniq  > $CLEAN_NAME.all.ls.sorted
 	comm -1 -3 $CLEAN_NAME.CONCOMPRA.ls.sorted $CLEAN_NAME.all.ls.sorted > $CLEAN_NAME.unmapped.ls
-	seqtk subseq $CLEAN_NAME/$file $CLEAN_NAME.unmapped.ls > ../unmapped/$NO_DIR_NAME
+	seqtk subseq $CLEAN_NAME/$NO_DIR_NAME $CLEAN_NAME.unmapped.ls > ../unmapped/$NO_DIR_NAME
 	cd ..
 done
 
