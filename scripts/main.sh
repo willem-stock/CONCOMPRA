@@ -60,8 +60,8 @@ do
 	cd temporary
         NO_DIR_NAME="$(basename "$file")"
 	CLEAN_NAME="${NO_DIR_NAME%.*}"
-	minimap2 -x map-ont -t $THREADS --secondary=no -K 20M across_sample_consensus_sequences.mmi $CLEAN_NAME/$NO_DIR_NAME > $CLEAN_NAME.paf
-	RES=$(echo "scale=4; $MIN*0.9" | bc)
+	minimap2 -x map-ont -t $THREADS -K 20M across_sample_consensus_sequences.mmi $CLEAN_NAME/$NO_DIR_NAME > $CLEAN_NAME.paf
+	RES=$(awk "BEGIN {printf \"%.4f\",$MIN * 0.9}")
 	$TEMPLATE_DIR/filterPAF_strict.py -i $CLEAN_NAME.paf -b $RES -m 10 > $CLEAN_NAME.CONCOMPRA.paf
 
 	#split of the unmapped reads
