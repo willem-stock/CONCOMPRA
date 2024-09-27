@@ -1,5 +1,5 @@
-TEMPLATE_DIR="/home/user/CONCOMPRA/scripts" #adjust to script directory
-PRIMER_SET="/home/user/CONCOMPRA/primer_set.fa" #adjust to the directory where the primer file is located
+TEMPLATE_DIR="/opt/CONCOMPRA/scripts" #adjust to script directory - for installation from git, will generaly be in the form of "/home/user/CONCOMPRA/scripts"
+PRIMER_SET="/data/primer_set.fa" #adjust to the directory where the primer file
 #primer file should be a fasta file in which:
 #The head primer should have "head" in its name (case-insensitive).Likewise for the tail primer.
 #Both sequences should be those that appear in the cDNA's sense strand.
