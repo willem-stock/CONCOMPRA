@@ -14,7 +14,17 @@ consensus approach for community profiling with nanopore amplicon sequencing dat
 This project is still under construction
 
 ## Installation
+### using the Docker image:
+* pull the Docker image
+```
+docker image pull willemstock/concompra:version0.0.2
+``` 
+* run the image, pointing to a local directory with has the (compressed) fastq files, the directory_list.txt (adjust the parameters but not the directories in this file) and the primer_set.fa (with the appropriate primer+anchor sequences) files
+```
+docker run -v "YOUR_LOCAL_DIRECTORY:/data" willemstock/concompra:version0.0.2
+```
 
+### manual installation
 * download and install conda/mamba if you do not have it yet (if you have freshly installed conda, don't forget to refresh your session)
 * retrieve this repository using git [or simply download the files]:
 ```
