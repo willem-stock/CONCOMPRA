@@ -1,7 +1,8 @@
 #rename, relabel and join the UMAP clusters
 
 #move all to folder
-mkdir clusterplots
+cd "$1"
+mkdir -p clusterplots
 find ./temporary/ -type f -iname "*.png" -exec sh -c '
   for file; do 
     mv --backup=numbered "$file" "clusterplots/$(basename "$(dirname "$file")").${file##*.}"

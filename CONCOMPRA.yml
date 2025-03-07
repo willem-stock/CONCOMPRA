@@ -2,7 +2,6 @@ name: CONCOMPRA
 channels:
   - conda-forge
   - bioconda
-  - defaults
 dependencies:
   - python==3.11
   - numba==0.60.0

@@ -18,31 +18,39 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.cluster import OPTICS
 
+threads = int(sys.argv[2])
+
 # Read sequences from a FASTA file
+print("Reading sequences...")
 records = list(SeqIO.parse(sys.argv[1], "fasta"))
 
 sequences = [str(record.seq) for record in records]
 ids = [str(record.id) for record in records]
 
 # Create a k-mer vectorizer
+print("Creating k-mer vectorizer...")
 kmer_size = 3
 vectorizer = CountVectorizer(analyzer='char', ngram_range=(kmer_size, kmer_size), dtype=np.uint8, binary=False, max_features=10000) # CountVectorizer(analyzer='char', ngram_range=(kmer_size, kmer_size))
 
 # Transform sequences into a k-mer feature matrix
+print("Transforming sequences into a k-mer feature matrix...")
 X_kmer = vectorizer.fit_transform(sequences) #.toarray()
 
 # UMAP
-X_embedded = umap.UMAP(n_neighbors=10, min_dist=0.1, verbose=2, low_memory=False).fit_transform(X_kmer)  #set low_memory=True for systems with lower memory/very large files
+print("UMAP...")
+X_embedded = umap.UMAP(n_neighbors=10, min_dist=0.1, verbose=2, low_memory=False, n_jobs=threads).fit_transform(X_kmer)  #set low_memory=True for systems with lower memory/very large files
 
 # Create DataFrame for UMAP embedding
 df_umap = pd.DataFrame(X_embedded, columns=["D1", "D2"])
 
 # OPTICS
-optics_model = OPTICS(min_samples=50, xi=0.02, min_cluster_size=0.005,n_jobs=int(sys.argv[2]))  # Adjust parameters as needed
+print("OPTICS...")
+optics_model = OPTICS(min_samples=50, xi=0.02, min_cluster_size=0.005, n_jobs=threads)  # Adjust parameters as needed
 optics_model.fit(X_embedded)
 bin_id = optics_model.labels_
 
 # Plot the clusters
+print("Plotting...")
 plt.figure(figsize=(20, 20))
 plt.scatter(X_embedded[:, 0], X_embedded[:, 1], c=bin_id, cmap='Spectral', s=1)
 plt.xlabel("UMAP1", fontsize=18)
